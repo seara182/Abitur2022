@@ -628,18 +628,18 @@ if (surveyForm) {
       }))
     );
 
-    const body = new URLSearchParams({
+    const body = JSON.stringify({
       name:         document.getElementById('name').value,
       email:        document.getElementById('email').value,
       plz:          document.getElementById('plz').value,
       lebensphase:  document.getElementById('lebensphase').value,
       beschreibung: document.getElementById('beschreibung').value,
       kommentar:    document.getElementById('kommentar').value,
-      files:        JSON.stringify(fileData),
+      files:        fileData,
     });
 
     try {
-      await fetch(SURVEY_ENDPOINT, { method: 'POST', body, mode: 'no-cors' });
+      await fetch(SURVEY_ENDPOINT, { method: 'POST', body, headers: { 'Content-Type': 'text/plain' }, mode: 'no-cors' });
       _showSuccess();
     } catch (err) {
       alert(`Fehler beim Senden: ${err.message}`);
