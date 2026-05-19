@@ -1506,37 +1506,6 @@ ul[role="list"] { list-style: none; }
 .form-wrapper__corner--bl { bottom: 14px; left: 14px;  border-bottom-width: 1px; border-left-width: 1px; }
 .form-wrapper__corner--br { bottom: 14px; right: 14px; border-bottom-width: 1px; border-right-width: 1px; }
 
-.form-placeholder {
-  text-align: center;
-  padding: var(--s-7) var(--s-3);
-  border: 1px dashed var(--hairline-strong);
-  border-radius: var(--radius-md);
-  background: var(--paper);
-}
-.form-placeholder__eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  margin-bottom: var(--s-2);
-}
-.form-placeholder__text {
-  font-size: 15px;
-  color: var(--ink-soft);
-  max-width: 480px;
-  margin-inline: auto;
-}
-.form-placeholder code {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  background: var(--paper-deep);
-  border: 1px solid var(--hairline);
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: var(--ink);
-}
-
 /* ----------------------------------------------------------------
    Native survey form — #erinnerungen
 ---------------------------------------------------------------- */
@@ -1686,6 +1655,12 @@ ul[role="list"] { list-style: none; }
   align-items: flex-start;
   gap: var(--s-2);
   padding-top: var(--s-1);
+}
+
+#uploadHint {
+  font-size: 0.85em;
+  opacity: 0.65;
+  margin-bottom: 0.5em;
 }
 
 #submitBtn {
