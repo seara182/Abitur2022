@@ -639,13 +639,8 @@ if (surveyForm) {
     });
 
     try {
-      const res  = await fetch(SURVEY_ENDPOINT, { method: 'POST', body });
-      const json = await res.json();
-      if (json.status === 'success') {
-        _showSuccess();
-      } else {
-        throw new Error(json.message || 'Unbekannter Fehler');
-      }
+      await fetch(SURVEY_ENDPOINT, { method: 'POST', body, mode: 'no-cors' });
+      _showSuccess();
     } catch (err) {
       alert(`Fehler beim Senden: ${err.message}`);
       btn.textContent = origText;
