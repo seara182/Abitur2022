@@ -223,6 +223,53 @@
 
 
   <!-- ============================================================
+       COUNTDOWN — live timer to Wiedersehen 02.07.2027 09:00 CEST
+  ============================================================ -->
+  <section class="countdown-band" aria-label="Countdown zum Wiedersehen">
+    <div class="countdown-inner">
+      <p class="countdown-eyebrow">
+        <span class="rule-dot"></span>
+        <span>02&thinsp;·&thinsp;07&thinsp;·&thinsp;2027 &nbsp;·&nbsp; 09:00 Uhr</span>
+        <span class="rule-dot"></span>
+      </p>
+      <p class="countdown-headline">Noch <em>fehlen uns</em></p>
+      <div class="countdown-grid" id="countdownGrid">
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdYears">—</span>
+          <span class="countdown-lbl">Jahre</span>
+        </div>
+        <div class="countdown-sep" aria-hidden="true">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdMonths">—</span>
+          <span class="countdown-lbl">Monate</span>
+        </div>
+        <div class="countdown-sep" aria-hidden="true">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdDays">—</span>
+          <span class="countdown-lbl">Tage</span>
+        </div>
+        <div class="countdown-sep" aria-hidden="true">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdHours">—</span>
+          <span class="countdown-lbl">Stunden</span>
+        </div>
+        <div class="countdown-sep" aria-hidden="true">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdMins">—</span>
+          <span class="countdown-lbl">Minuten</span>
+        </div>
+        <div class="countdown-sep" aria-hidden="true">:</div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cdSecs">—</span>
+          <span class="countdown-lbl">Sekunden</span>
+        </div>
+      </div>
+      <p class="countdown-sub">bis zum Wiedersehen</p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
        NUMBERS — bento stat strip
   ============================================================ -->
   <section class="stats" aria-label="Zahlen">
@@ -258,7 +305,7 @@
       <header class="section-header section-header--center distance-header">
         <p class="section-eyebrow section-eyebrow--center">
           <span class="rule rule--short"></span>
-          <span>Kapitel III &nbsp;·&nbsp; Distanz</span>
+          <span>Kapitel II &nbsp;·&nbsp; Distanz</span>
           <span class="rule rule--short"></span>
         </p>
         <p class="distance-label">die Spanne zwischen uns</p>
@@ -566,6 +613,9 @@
           </div>
 
           <div class="survey-actions">
+            <p id="uploadHint" style="display:none; font-size:0.85em; opacity:0.65; margin-bottom:0.5em;">
+              Ich bin Ingenieur, kein Developer — das Senden von Dateien dauert etwas O.o
+            </p>
             <button type="submit" id="submitBtn">Absenden</button>
             <p class="survey-privacy-hint">
               Mit dem Absenden stimmst du der Verarbeitung gemäß unserer

@@ -550,6 +550,8 @@ function _updateFileUI() {
     fileSizeTotEl.classList.toggle('is-over-limit', total > MAX_UPLOAD_BYTES);
   }
   fileDropZone?.classList.toggle('is-over-limit', total > MAX_UPLOAD_BYTES);
+  const hint = document.getElementById('uploadHint');
+  if (hint) hint.style.display = fileInput.files.length > 0 ? 'block' : 'none';
 }
 
 if (fileInput) fileInput.addEventListener('change', _updateFileUI);
@@ -638,14 +640,8 @@ if (surveyForm) {
       files:        fileData,
     });
 
-    try {
-      await fetch(SURVEY_ENDPOINT, { method: 'POST', body, headers: { 'Content-Type': 'text/plain' }, mode: 'no-cors' });
-      _showSuccess();
-    } catch (err) {
-      alert(`Fehler beim Senden: ${err.message}`);
-      btn.textContent = origText;
-      btn.disabled = false;
-    }
+    fetch(SURVEY_ENDPOINT, { method: 'POST', body, headers: { 'Content-Type': 'text/plain' }, mode: 'no-cors' });
+    _showSuccess();
   });
 }
 
@@ -661,6 +657,74 @@ document.querySelectorAll('.polaroid-photo').forEach(img => {
   img.addEventListener('load',  reveal);
   img.addEventListener('error', () => img.closest('picture')?.remove());
 });
+
+
+/* ----------------------------------------------------------------
+   COUNTDOWN — live timer to 02.07.2027 09:00 German Summer Time (CEST = UTC+2)
+   All calendar arithmetic is done in CEST via a fixed +2h offset so the
+   display is correct regardless of the viewer's local timezone.
+---------------------------------------------------------------- */
+(function initCountdown() {
+  // Exact target moment — CEST is UTC+2, permanently during summer
+  const TARGET = new Date('2027-07-02T09:00:00+02:00');
+
+  const elY  = document.getElementById('cdYears');
+  const elMo = document.getElementById('cdMonths');
+  const elD  = document.getElementById('cdDays');
+  const elH  = document.getElementById('cdHours');
+  const elMi = document.getElementById('cdMins');
+  const elS  = document.getElementById('cdSecs');
+
+  if (!elY) return;
+
+  const pad = n => String(Math.max(0, n)).padStart(2, '0');
+
+  // Return date components in CEST (UTC+2) regardless of browser locale
+  function cestParts(date) {
+    const d = new Date(date.getTime() + 2 * 3600 * 1000);
+    return { y: d.getUTCFullYear(), mo: d.getUTCMonth(), d: d.getUTCDate(),
+             h: d.getUTCHours(), mi: d.getUTCMinutes(), s: d.getUTCSeconds() };
+  }
+
+  function tick() {
+    const now = new Date();
+    if (TARGET <= now) {
+      [elY, elMo, elD, elH, elMi, elS].forEach(el => { el.textContent = '00'; });
+      return;
+    }
+
+    const t = cestParts(TARGET);
+    const n = cestParts(now);
+
+    let years   = t.y  - n.y;
+    let months  = t.mo - n.mo;
+    let days    = t.d  - n.d;
+    let hours   = t.h  - n.h;
+    let minutes = t.mi - n.mi;
+    let seconds = t.s  - n.s;
+
+    if (seconds < 0) { seconds += 60; minutes--; }
+    if (minutes < 0) { minutes += 60; hours--;   }
+    if (hours   < 0) { hours   += 24; days--;    }
+    if (days    < 0) {
+      // borrow days from the month preceding the target
+      const prevMonthDays = new Date(Date.UTC(t.y, t.mo, 0)).getUTCDate();
+      days += prevMonthDays;
+      months--;
+    }
+    if (months < 0) { months += 12; years--; }
+
+    elY .textContent = pad(years);
+    elMo.textContent = pad(months);
+    elD .textContent = pad(days);
+    elH .textContent = pad(hours);
+    elMi.textContent = pad(minutes);
+    elS .textContent = pad(seconds);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+})();
 
 
 /* ----------------------------------------------------------------
