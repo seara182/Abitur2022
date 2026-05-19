@@ -510,31 +510,62 @@
         <div class="form-wrapper__corner form-wrapper__corner--bl"></div>
         <div class="form-wrapper__corner form-wrapper__corner--br"></div>
 
-        <!-- GDPR: iframe injected by JS after consent; src never touches network without it -->
-        <div class="consent-wrap" id="formsConsentWrap">
-          <div class="consent-card">
-            <div class="consent-card__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-8h8v2H8v-2zm0 4h5v2H8v-2zm0-8h3v2H8V8z"/>
-              </svg>
-            </div>
-            <p class="consent-card__text">
-              Mit dem Laden akzeptierst du die<br>Datenschutzerklärung von <strong>Google</strong>.
-            </p>
-            <button class="consent-card__btn" type="button"
-                    data-consent-key="formsConsent"
-                    data-iframe-type="forms">
-              Formular laden
-            </button>
-            <p class="consent-card__hint">Einstellung wird lokal gespeichert</p>
+        <!-- TODO (Datenschutz/Impressum): Datenweiterleitung erfolgt jetzt an eine
+             eigene Google-Apps-Script-Web-App statt direkt über das eingebettete
+             Google-Formular. Bitte Datenschutzerklärung und Impressum entsprechend
+             aktualisieren (neue Datenempfängerin, Zweck, Löschfristen). -->
+
+        <form id="surveyForm" novalidate>
+          <div class="survey-field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required minlength="2" placeholder="Name">
           </div>
+          <div class="survey-field">
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" name="email" required placeholder="E-Mail">
+          </div>
+          <div class="survey-field">
+            <label for="plz">PLZ</label>
+            <input type="text" id="plz" name="plz" placeholder="PLZ">
+          </div>
+          <div class="survey-field">
+            <label for="lebensphase">Lebensphase</label>
+            <textarea id="lebensphase" name="lebensphase" rows="4"
+              placeholder="Was machst du gerade beruflich oder studierst du? Wo stehst du im Leben?"></textarea>
+          </div>
+          <div class="survey-field">
+            <label for="fileUpload">Fotos · Videos · Audio</label>
+            <input type="file" id="fileUpload" name="fileUpload" multiple accept="image/*,video/*,audio/*">
+          </div>
+          <div class="survey-field">
+            <label for="beschreibung">Beschreibung der Dateien</label>
+            <textarea id="beschreibung" name="beschreibung" rows="3"
+              placeholder="Beschreibung der Bilder"></textarea>
+          </div>
+          <div class="survey-field">
+            <label for="kommentar">Weitere Kommentare</label>
+            <textarea id="kommentar" name="kommentar" rows="4"
+              placeholder="Weitere Kommentare"></textarea>
+          </div>
+
+          <div class="survey-actions">
+            <button type="submit" id="submitBtn">Absenden</button>
+            <p class="survey-privacy-hint">
+              Mit dem Absenden stimmst du der Verarbeitung gemäß unserer
+              <a href="#" id="openDatenschutz2">Datenschutzerklärung</a> zu.
+            </p>
+          </div>
+        </form>
+
+        <div id="successMessage" style="display:none" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <polyline points="7 12 10.5 15.5 17 9" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="success-title">Danke für deinen Beitrag!</p>
+          <p class="success-sub">Wir freuen uns auf das Wiedersehen.</p>
         </div>
-        <p class="form-direct-link">
-          Formular lädt nicht?
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfRyl5m30pjiKaViqcqBKEMQv-vnGWqXDncgIYSFA3XxF4Ewg/viewform" target="_blank" rel="noopener noreferrer">
-            Direkt öffnen ↗
-          </a>
-        </p>
       </div>
 
     </div>

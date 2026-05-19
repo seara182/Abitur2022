@@ -463,6 +463,7 @@ document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('c
 document.querySelectorAll('.modal-backdrop').forEach(el => el.addEventListener('click', closeModal));
 document.getElementById('openImpressum')?.addEventListener('click', () => openModal('impressum-modal'));
 document.getElementById('openDatenschutz')?.addEventListener('click', () => openModal('datenschutz-modal'));
+document.getElementById('openDatenschutz2')?.addEventListener('click', e => { e.preventDefault(); openModal('datenschutz-modal'); });
 
 
 /* ----------------------------------------------------------------
@@ -484,20 +485,6 @@ const IFRAME_DEFS = {
       title:           'Spotify Playlist',
     },
   },
-  forms: {
-    attrs: {
-      class:        'google-form-iframe',
-      src:          'https://docs.google.com/forms/d/e/1FAIpQLSfRyl5m30pjiKaViqcqBKEMQv-vnGWqXDncgIYSFA3XxF4Ewg/viewform?embedded=true',
-      width:        '100%',
-      height:       '900',
-      frameborder:  '0',
-      marginheight: '0',
-      marginwidth:  '0',
-      title:        'Erinnerungen-Formular',
-      loading:      'eager',
-      allow:        'autoplay',
-    },
-  },
 };
 
 function _injectIframe(wrapEl, type, animate) {
@@ -514,7 +501,6 @@ function _injectIframe(wrapEl, type, animate) {
     wrapEl.innerHTML = '';
     wrapEl.appendChild(iframe);
   }
-  if (type === 'forms') setTimeout(() => ScrollTrigger.refresh(), 950);
 }
 
 document.querySelectorAll('.consent-wrap').forEach(wrapEl => {
@@ -534,6 +520,58 @@ document.querySelectorAll('.consent-wrap').forEach(wrapEl => {
     _injectIframe(wrapEl, type, true);
   });
 });
+
+
+/* ----------------------------------------------------------------
+   Erinnerungen — native survey form → Google Apps Script
+---------------------------------------------------------------- */
+const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbziQI7ij_NY25I_9s_XCi-D8apSpiOjeUCwJ9eDsjl4Bh8sbGHas5yCBUw2yM5vu60r/exec';
+
+const surveyForm = document.getElementById('surveyForm');
+if (surveyForm) {
+  surveyForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const origText = btn.textContent;
+    btn.textContent = 'Wird gesendet…';
+    btn.disabled = true;
+
+    const fileInput = document.getElementById('fileUpload');
+    const fileData = await Promise.all(
+      Array.from(fileInput.files).map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve({ name: file.name, type: file.type, data: reader.result.split(',')[1] });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }))
+    );
+
+    const body = new URLSearchParams({
+      name:         document.getElementById('name').value,
+      email:        document.getElementById('email').value,
+      plz:          document.getElementById('plz').value,
+      lebensphase:  document.getElementById('lebensphase').value,
+      beschreibung: document.getElementById('beschreibung').value,
+      kommentar:    document.getElementById('kommentar').value,
+      files:        JSON.stringify(fileData),
+    });
+
+    try {
+      const res  = await fetch(SURVEY_ENDPOINT, { method: 'POST', body });
+      const json = await res.json();
+      if (json.status === 'success') {
+        surveyForm.style.display = 'none';
+        document.getElementById('successMessage').style.display = 'flex';
+      } else {
+        throw new Error(json.message || 'Unbekannter Fehler');
+      }
+    } catch (err) {
+      alert(`Fehler beim Senden: ${err.message}`);
+      btn.textContent = origText;
+      btn.disabled = false;
+    }
+  });
+}
 
 
 /* ----------------------------------------------------------------
