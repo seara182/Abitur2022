@@ -526,19 +526,101 @@ document.querySelectorAll('.consent-wrap').forEach(wrapEl => {
    Erinnerungen — native survey form → Google Apps Script
 ---------------------------------------------------------------- */
 const SURVEY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbziQI7ij_NY25I_9s_XCi-D8apSpiOjeUCwJ9eDsjl4Bh8sbGHas5yCBUw2yM5vu60r/exec';
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
-const surveyForm = document.getElementById('surveyForm');
-if (surveyForm) {
-  surveyForm.addEventListener('submit', async (e) => {
+const surveyForm    = document.getElementById('surveyForm');
+const fileDropZone  = document.getElementById('fileDropZone');
+const fileInput     = document.getElementById('fileUpload');
+const fileListEl    = document.getElementById('fileList');
+const fileSizeTotEl = document.getElementById('fileSizeTotal');
+
+function _updateFileUI() {
+  if (!fileListEl || !fileInput) return;
+  fileListEl.innerHTML = '';
+  let total = 0;
+  Array.from(fileInput.files).forEach(f => {
+    total += f.size;
+    const li = document.createElement('li');
+    li.className = 'file-item';
+    li.textContent = `${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB`;
+    fileListEl.appendChild(li);
+  });
+  if (fileSizeTotEl) {
+    fileSizeTotEl.textContent = total > 0 ? `${(total / 1024 / 1024).toFixed(1)} / 20 MB gesamt` : '';
+    fileSizeTotEl.classList.toggle('is-over-limit', total > MAX_UPLOAD_BYTES);
+  }
+  fileDropZone?.classList.toggle('is-over-limit', total > MAX_UPLOAD_BYTES);
+}
+
+if (fileInput) fileInput.addEventListener('change', _updateFileUI);
+
+if (fileDropZone) {
+  fileDropZone.addEventListener('dragover', e => { e.preventDefault(); fileDropZone.classList.add('is-over'); });
+  fileDropZone.addEventListener('dragleave', () => fileDropZone.classList.remove('is-over'));
+  fileDropZone.addEventListener('drop', e => {
     e.preventDefault();
+    fileDropZone.classList.remove('is-over');
+    if (fileInput) { fileInput.files = e.dataTransfer.files; _updateFileUI(); }
+  });
+  fileDropZone.querySelector('.file-drop-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    fileInput?.click();
+  });
+}
+
+function _showSuccess() {
+  const successEl = document.getElementById('successMessage');
+  if (!successEl || !surveyForm) return;
+
+  gsap.to(surveyForm, {
+    opacity: 0, y: -16, duration: 0.35, ease: 'power2.in',
+    onComplete() {
+      surveyForm.style.display = 'none';
+      successEl.style.opacity = '0';
+      successEl.style.display = 'flex';
+
+      gsap.to('.success-circle', { strokeDashoffset: 0, duration: 0.55, ease: 'power2.inOut', delay: 0.1 });
+      gsap.to('.success-check',  { strokeDashoffset: 0, duration: 0.35, ease: 'power2.out',   delay: 0.6 });
+      gsap.to(successEl,         { opacity: 1, duration: 0.45, ease: 'power2.out' });
+
+      gsap.delayedCall(3.2, () => {
+        gsap.to(successEl, {
+          opacity: 0, y: 16, duration: 0.35, ease: 'power2.in',
+          onComplete() {
+            successEl.style.display = 'none';
+            gsap.set('.success-circle', { strokeDashoffset: 70 });
+            gsap.set('.success-check',  { strokeDashoffset: 15 });
+            surveyForm.reset();
+            if (fileListEl)    fileListEl.innerHTML = '';
+            if (fileSizeTotEl) fileSizeTotEl.textContent = '';
+            fileDropZone?.classList.remove('is-over-limit');
+            gsap.set(surveyForm, { y: 20, opacity: 0 });
+            surveyForm.style.display = 'flex';
+            gsap.to(surveyForm, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
+          },
+        });
+      });
+    },
+  });
+}
+
+if (surveyForm) {
+  surveyForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const totalBytes = Array.from(fileInput?.files ?? []).reduce((s, f) => s + f.size, 0);
+    if (totalBytes > MAX_UPLOAD_BYTES) {
+      alert('Die Dateien überschreiten das Limit von 20 MB. Bitte weniger oder kleinere Dateien auswählen.');
+      return;
+    }
+
     const btn = document.getElementById('submitBtn');
     const origText = btn.textContent;
     btn.textContent = 'Wird gesendet…';
     btn.disabled = true;
 
-    const fileInput = document.getElementById('fileUpload');
     const fileData = await Promise.all(
-      Array.from(fileInput.files).map(file => new Promise((resolve, reject) => {
+      Array.from(fileInput?.files ?? []).map(file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload  = () => resolve({ name: file.name, type: file.type, data: reader.result.split(',')[1] });
         reader.onerror = reject;
@@ -560,8 +642,7 @@ if (surveyForm) {
       const res  = await fetch(SURVEY_ENDPOINT, { method: 'POST', body });
       const json = await res.json();
       if (json.status === 'success') {
-        surveyForm.style.display = 'none';
-        document.getElementById('successMessage').style.display = 'flex';
+        _showSuccess();
       } else {
         throw new Error(json.message || 'Unbekannter Fehler');
       }
