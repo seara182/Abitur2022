@@ -946,9 +946,8 @@ ul[role="list"] { list-style: none; }
 .countdown-grid {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
-  gap: clamp(var(--s-1), 2.5vw, var(--s-4));
-  flex-wrap: wrap;
+  justify-content: space-evenly;
+  width: 100%;
   margin-bottom: var(--s-5);
 }
 .countdown-unit {
@@ -976,12 +975,12 @@ ul[role="list"] { list-style: none; }
 }
 .countdown-sep {
   font-family: var(--font-mono);
-  font-size: clamp(1.6rem, 4vw, 3.2rem);
+  font-size: clamp(1.2rem, 3vw, 2.4rem);
   color: var(--accent);
-  opacity: 0.30;
+  opacity: 0.25;
   line-height: 1;
-  padding-top: 0.05em;
-  align-self: flex-start;
+  align-self: center;
+  margin-bottom: 1.6rem;
 }
 .countdown-sub {
   font-family: var(--font-serif);

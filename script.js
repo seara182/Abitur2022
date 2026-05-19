@@ -665,7 +665,6 @@ document.querySelectorAll('.polaroid-photo').forEach(img => {
    display is correct regardless of the viewer's local timezone.
 ---------------------------------------------------------------- */
 (function initCountdown() {
-  // Exact target moment — CEST is UTC+2, permanently during summer
   const TARGET = new Date('2027-07-02T09:00:00+02:00');
 
   const elY  = document.getElementById('cdYears');
@@ -679,17 +678,41 @@ document.querySelectorAll('.polaroid-photo').forEach(img => {
 
   const pad = n => String(Math.max(0, n)).padStart(2, '0');
 
-  // Return date components in CEST (UTC+2) regardless of browser locale
   function cestParts(date) {
     const d = new Date(date.getTime() + 2 * 3600 * 1000);
     return { y: d.getUTCFullYear(), mo: d.getUTCMonth(), d: d.getUTCDate(),
              h: d.getUTCHours(), mi: d.getUTCMinutes(), s: d.getUTCSeconds() };
   }
 
+  // Track last rendered values so we only animate when something actually changes
+  const _prev = { y: null, mo: null, d: null, h: null, mi: null, s: null };
+
+  function updateNum(el, key, newVal) {
+    if (_prev[key] === newVal) return;
+    _prev[key] = newVal;
+
+    if (prefersReducedMotion) { el.textContent = newVal; return; }
+
+    // Slide old value up + out, then snap text and slide new value in from below
+    gsap.killTweensOf(el);
+    gsap.to(el, {
+      y: -10, opacity: 0, duration: 0.11, ease: 'power2.in',
+      onComplete() {
+        el.textContent = newVal;
+        gsap.fromTo(el,
+          { y: 10, opacity: 0 },
+          { y: 0,  opacity: 1, duration: 0.22, ease: 'power3.out' }
+        );
+      },
+    });
+  }
+
   function tick() {
     const now = new Date();
     if (TARGET <= now) {
-      [elY, elMo, elD, elH, elMi, elS].forEach(el => { el.textContent = '00'; });
+      ['y','mo','d','h','mi','s'].forEach((k, i) => {
+        updateNum([elY,elMo,elD,elH,elMi,elS][i], k, '00');
+      });
       return;
     }
 
@@ -707,19 +730,18 @@ document.querySelectorAll('.polaroid-photo').forEach(img => {
     if (minutes < 0) { minutes += 60; hours--;   }
     if (hours   < 0) { hours   += 24; days--;    }
     if (days    < 0) {
-      // borrow days from the month preceding the target
       const prevMonthDays = new Date(Date.UTC(t.y, t.mo, 0)).getUTCDate();
       days += prevMonthDays;
       months--;
     }
     if (months < 0) { months += 12; years--; }
 
-    elY .textContent = pad(years);
-    elMo.textContent = pad(months);
-    elD .textContent = pad(days);
-    elH .textContent = pad(hours);
-    elMi.textContent = pad(minutes);
-    elS .textContent = pad(seconds);
+    updateNum(elY,  'y',  pad(years));
+    updateNum(elMo, 'mo', pad(months));
+    updateNum(elD,  'd',  pad(days));
+    updateNum(elH,  'h',  pad(hours));
+    updateNum(elMi, 'mi', pad(minutes));
+    updateNum(elS,  's',  pad(seconds));
   }
 
   tick();
