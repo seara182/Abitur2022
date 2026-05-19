@@ -622,7 +622,7 @@ if (surveyForm) {
     const fileData = await Promise.all(
       Array.from(fileInput?.files ?? []).map(file => new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload  = () => resolve({ name: file.name, type: file.type, data: reader.result.split(',')[1] });
+        reader.onload  = () => resolve({ filename: file.name, mimeType: file.type, base64: reader.result.split(',')[1] });
         reader.onerror = reject;
         reader.readAsDataURL(file);
       }))
