@@ -89,38 +89,46 @@ function applySiteMode(mode) {
 
 function runModeTransition(targetMode, ox, oy) {
   const fx = document.getElementById('modeFx');
+
+  // Swap-once guard so the mode flip can never be skipped or doubled.
+  let swapped = false;
+  const swap = () => { if (!swapped) { swapped = true; applySiteMode(targetMode); } };
+
   // No overlay if reduced motion or GSAP/overlay unavailable — swap instantly
   if (prefersReducedMotion || !fx || typeof gsap === 'undefined') {
-    applySiteMode(targetMode);
+    swap();
     return;
   }
+
   const glitch = fx.querySelector('.mode-fx__glitch');
   const maxR = Math.hypot(
     Math.max(ox, window.innerWidth - ox),
     Math.max(oy, window.innerHeight - oy)
   ) + 40;
+  const setR = r => fx.style.setProperty('--fx-r', r + 'px');
 
   fx.style.setProperty('--fx-x', ox + 'px');
   fx.style.setProperty('--fx-y', oy + 'px');
+  setR(0);
   fx.classList.add('is-active');
 
+  // Animate a plain proxy and write the clip radius each frame (no CSS-var
+  // tweening — more robust across GSAP/browser combos).
+  const prog = { r: 0 };
   const tl = gsap.timeline({
     onComplete() {
       fx.classList.remove('is-active');
-      gsap.set(fx, { '--fx-r': '0px' });
+      setR(0);
       if (glitch) gsap.set(glitch, { opacity: 0 });
     },
   });
-  // iris opens to cover the viewport
-  tl.fromTo(fx, { '--fx-r': '0px' },
-        { '--fx-r': maxR + 'px', duration: 0.45, ease: 'power2.out' })
-    // swap theme while fully covered
-    .add(() => applySiteMode(targetMode))
-    // RGB-glitch flash at the peak
-    .fromTo(glitch, { opacity: 0 },
-        { opacity: 0.9, duration: 0.05, repeat: 3, yoyo: true }, '<')
-    // iris closes, revealing the new theme
-    .to(fx, { '--fx-r': '0px', duration: 0.4, ease: 'power2.in' }, '+=0.04');
+  tl.to(prog, { r: maxR, duration: 0.45, ease: 'power2.out', onUpdate() { setR(prog.r); } })
+    .add(swap)                               // swap theme while fully covered
+    .fromTo(glitch, { opacity: 0 }, { opacity: 0.9, duration: 0.05, repeat: 3, yoyo: true }, '<')
+    .to(prog, { r: 0, duration: 0.4, ease: 'power2.in', onUpdate() { setR(prog.r); } }, '+=0.04');
+
+  // Safety net: guarantee the swap even if the timeline is interrupted/stalls.
+  setTimeout(swap, 600);
 }
 
 (function initModeToggle() {
