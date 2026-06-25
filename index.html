@@ -5,14 +5,28 @@
   <meta name="robots" content="noindex">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="5 Jahre Abitur — Ein Rückblick und Wiedersehen." />
+  <meta name="theme-color" content="#07070b" />
   <title>5 Jahre Abi · 2022 – 2027</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap"
     rel="stylesheet"
   />
+
+  <!-- Set the saved mode before first paint (no flash). Default: business. -->
+  <script>
+    (function () {
+      try {
+        var m = localStorage.getItem('siteMode');
+        if (m !== 'party' && m !== 'business') m = 'business';
+        document.documentElement.classList.add('mode-' + m);
+      } catch (e) {
+        document.documentElement.classList.add('mode-business');
+      }
+    })();
+  </script>
 
   <link rel="stylesheet" href="style.css" />
 
@@ -45,6 +59,11 @@
     </filter>
     <rect width="100%" height="100%" filter="url(#grainFilter)" />
   </svg>
+
+  <!-- Mode-switch transition overlay (iris reveal + glitch flash) -->
+  <div id="modeFx" class="mode-fx" aria-hidden="true">
+    <div class="mode-fx__glitch"></div>
+  </div>
 
 
   <!-- ============================================================
@@ -113,7 +132,7 @@
         <p class="hero-eyebrow"><span class="rule-dot"></span>&nbsp;Jahrgang MMXXII</p>
         <h1 id="heroHeading" class="hero-headline">
           <span class="hero-headline__thin">vor fünf</span>
-          <span class="hero-headline__bold">Jahren</span>
+          <span class="hero-headline__bold glitch" data-text="Jahren">Jahren</span>
           <span class="hero-headline__thin"><em>schloss unser</em></span>
           <span class="hero-headline__thin">Jahrgang ab.</span>
         </h1>
@@ -134,6 +153,15 @@
       </a>
     </div>
   </section>
+
+
+  <!-- Kinetic ticker band -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span class="ticker__item">fünf jahre <i>✦</i> jahrgang mmxxii <i>✦</i> wiedersehen <i>✦</i> wo sind sie nur hin <i>✦</i> 2022 <i>→</i> 2027 <i>✦</i> save the date <i>✦</i> </span>
+      <span class="ticker__item">fünf jahre <i>✦</i> jahrgang mmxxii <i>✦</i> wiedersehen <i>✦</i> wo sind sie nur hin <i>✦</i> 2022 <i>→</i> 2027 <i>✦</i> save the date <i>✦</i> </span>
+    </div>
+  </div>
 
 
   <!-- ============================================================
@@ -316,6 +344,10 @@
           </span>
         </h2>
 
+        <p class="distance-note">
+          Noch ganz am Anfang: Die Karte aktualisiert sich sporadisch, sobald
+          weitere Rückmeldungen eintreffen.
+        </p>
       </header>
 
       <div class="distance-stage">
@@ -331,7 +363,7 @@
         <div class="distance-readout" aria-hidden="true">
           <div class="distance-readout__item">
             <span class="distance-readout__lbl">Datenpunkte</span>
-            <span class="distance-readout__val">104</span>
+            <span class="distance-readout__val">3</span>
           </div>
 
           <div class="distance-readout__item">
@@ -632,6 +664,15 @@
   </section>
 
 
+  <!-- Kinetic ticker band (reverse) -->
+  <div class="ticker ticker--rev" aria-hidden="true">
+    <div class="ticker__track">
+      <span class="ticker__item">mit liebe gemacht <i>✦</i> erinnerungen teilen <i>✦</i> der soundtrack <i>✦</i> bis zum jubiläum <i>✦</i> <i>★</i> <i>✧</i> </span>
+      <span class="ticker__item">mit liebe gemacht <i>✦</i> erinnerungen teilen <i>✦</i> der soundtrack <i>✦</i> bis zum jubiläum <i>✦</i> <i>★</i> <i>✧</i> </span>
+    </div>
+  </div>
+
+
   <!-- ============================================================
        FOOTER
   ============================================================ -->
@@ -645,6 +686,26 @@
       </nav>
     </div>
   </footer>
+
+
+  <!-- ============================================================
+       MODE SWITCH — Business ⇄ Party (with iris/glitch transition)
+  ============================================================ -->
+  <div class="mode-switch-band">
+    <span class="mode-switch-band__label">Stil wählen</span>
+    <button
+      type="button"
+      id="modeToggle"
+      class="mode-toggle"
+      role="switch"
+      aria-checked="false"
+      aria-label="Zwischen Business- und Party-Stil wechseln"
+    >
+      <span class="mode-toggle__knob" aria-hidden="true"></span>
+      <span class="mode-toggle__opt mode-toggle__opt--biz">Business</span>
+      <span class="mode-toggle__opt mode-toggle__opt--party">Party</span>
+    </button>
+  </div>
 
 
   <!-- ============================================================

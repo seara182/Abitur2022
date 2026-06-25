@@ -8,7 +8,7 @@
    1. TOKENS
 ---------------------------------------------------------------- */
 :root {
-  /* Pure-white paper / Apple-launch palette */
+  /* Pure-white paper / Apple-launch palette (BUSINESS mode — default) */
   --paper:        #ffffff;
   --paper-deep:   #fafafa;             /* card surface */
   --paper-rim:    #f1f1f3;
@@ -25,7 +25,16 @@
   --hairline:        rgba(0, 0, 0, 0.08);
   --hairline-strong: rgba(0, 0, 0, 0.16);
 
+  /* Neon palette — referenced only by .mode-party rules (PARTY mode) */
+  --acid:         #c6ff3a;
+  --magenta:      #ff3df0;
+  --cyan:         #3df0ff;
+  --violet:       #a06bff;
+  --glitch-r:     #ff2b6d;
+  --glitch-b:     #2b9bff;
+
   /* Type */
+  --font-display: "Syne", "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-serif:   "Instrument Serif", "EB Garamond", "Cormorant Garamond", Georgia, serif;
   --font-sans:    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:    "JetBrains Mono", "SF Mono", ui-monospace, "Menlo", monospace;
@@ -65,6 +74,27 @@
   /* Card shadows — soft, Apple-like */
   --shadow-card:    0 1px 1px rgba(0,0,0,0.04), 0 6px 24px -8px rgba(0,0,0,0.10);
   --shadow-lift:    0 1px 2px rgba(0,0,0,0.06), 0 22px 50px -16px rgba(0,0,0,0.18);
+}
+
+/* PARTY mode — dark neon token overrides (scoped to the html.mode-party class) */
+.mode-party {
+  --paper:        #07070b;
+  --paper-deep:   #0e0e15;
+  --paper-rim:    #16161f;
+  --ink:          #f4f4ff;
+  --ink-soft:     #cfd0ea;
+  --ink-mute:     #9fa0c8;
+
+  --accent:       #3df0ff;
+  --accent-deep:  #46f3ff;
+  --accent-soft:  rgba(61, 240, 255, 0.14);
+  --accent-glow:  rgba(61, 240, 255, 0.45);
+
+  --hairline:        rgba(255, 255, 255, 0.10);
+  --hairline-strong: rgba(255, 255, 255, 0.22);
+
+  --shadow-card:  0 0 0 1px rgba(255,255,255,0.04), 0 18px 50px -22px rgba(0,0,0,0.9), 0 0 28px -10px var(--accent-glow);
+  --shadow-lift:  0 0 0 1px rgba(255,255,255,0.07), 0 30px 70px -24px rgba(0,0,0,0.95), 0 0 46px -10px var(--accent-glow);
 }
 
 
@@ -2251,6 +2281,401 @@ ul[role="list"] { list-style: none; }
    18. PRINT
 ---------------------------------------------------------------- */
 @media print {
-  .site-header, .hero-scroll-hint, .modal, .btn, .grain { display: none !important; }
+  .site-header, .hero-scroll-hint, .modal, .btn, .grain, .ticker { display: none !important; }
   .hero { min-height: auto; padding-block: var(--s-7); }
 }
+
+
+/* ================================================================
+   19. HYPERMODERN LAYER — dark neon, glitch, kinetic, maximalist
+   Scoped to html.mode-party so BUSINESS mode renders the original look.
+================================================================ */
+
+/* Tickers exist in the DOM for both modes; only shown in party mode */
+.ticker { display: none; }
+
+/* --- Global atmosphere --------------------------------------- */
+.mode-party body {
+  background:
+    radial-gradient(120% 80% at 12% -8%, rgba(160,107,255,0.12), transparent 60%),
+    radial-gradient(120% 80% at 92% 4%, rgba(61,240,255,0.10), transparent 58%),
+    radial-gradient(140% 90% at 50% 120%, rgba(255,61,240,0.10), transparent 60%),
+    var(--paper);
+}
+
+/* Grain reads as light specks on the dark field */
+.mode-party .grain { mix-blend-mode: screen; opacity: 0.06; }
+
+/* Full-bleed scanline veil */
+.mode-party body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 900;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.035) 0px,
+    rgba(255,255,255,0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+.mode-party ::selection { background: var(--magenta); color: #07070b; }
+
+/* Opaque section backgrounds → let the mesh + accents breathe */
+.mode-party .intro,
+.mode-party .stats,
+.mode-party .spotify,
+.mode-party .archiv,
+.mode-party .erinnerungen,
+.mode-party .distance { background: transparent; }
+
+/* --- Display typeface on the loud type ----------------------- */
+.mode-party .section-title,
+.mode-party .section-title--left,
+.mode-party .distance-headline,
+.mode-party .distance-counter__num,
+.mode-party .archiv-card__title,
+.mode-party .spotify-title,
+.mode-party .stat__num,
+.mode-party .hero-headline__bold,
+.mode-party .countdown-headline,
+.mode-party .modal-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.mode-party .countdown-headline { font-weight: 700; }
+
+/* Duochrome editorial italics with bloom */
+.mode-party .section-title em,
+.mode-party .hero-headline__thin em,
+.mode-party .archiv-header em {
+  color: var(--magenta);
+  text-shadow: 0 0 26px rgba(255,61,240,0.4);
+}
+.mode-party .section-title--left em { color: var(--cyan); text-shadow: 0 0 26px rgba(61,240,255,0.4); }
+
+/* Neon dots + sparkle dividers in eyebrows */
+.mode-party .rule-dot { box-shadow: 0 0 10px 1px var(--accent); }
+.mode-party .section-eyebrow span:not([class]),
+.mode-party .countdown-eyebrow span:not([class]) { position: relative; }
+.mode-party .section-eyebrow span:not([class])::before { content: "✦ "; color: var(--magenta); }
+.mode-party .section-eyebrow span:not([class])::after  { content: " ✦"; color: var(--cyan); }
+
+/* --- HERO ----------------------------------------------------- */
+.mode-party .hero,
+.mode-party #hero-map { background: #07070b; }
+.mode-party .hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 50% at 8% 88%, rgba(198,255,58,0.16), transparent 60%),
+    radial-gradient(45% 55% at 95% 10%, rgba(255,61,240,0.18), transparent 60%),
+    radial-gradient(40% 45% at 60% 95%, rgba(61,240,255,0.16), transparent 60%);
+  mix-blend-mode: screen;
+}
+.mode-party .hero-headline__bold {
+  background: linear-gradient(92deg, var(--cyan), var(--violet) 55%, var(--magenta));
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--magenta); /* fallback */
+}
+.mode-party .hero-eyebrow { color: var(--cyan); }
+.mode-party .hero-timeline__needle { box-shadow: 0 0 10px 1px var(--accent); }
+
+/* --- GLITCH headline treatment ------------------------------- */
+.mode-party .glitch { position: relative; display: inline-block; isolation: isolate; }
+.mode-party .glitch::before,
+.mode-party .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-background-clip: border-box;
+          background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+.mode-party .glitch::before { color: var(--glitch-r); animation: glitch-r 2.6s steps(2, end) infinite; }
+.mode-party .glitch::after  { color: var(--glitch-b); animation: glitch-b 2.6s steps(2, end) infinite; }
+@keyframes glitch-r {
+  0%, 92%, 100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+  93% { transform: translate(-3px, 1px); clip-path: inset(0 0 62% 0); }
+  96% { transform: translate(3px, -1px); clip-path: inset(58% 0 0 0); }
+}
+@keyframes glitch-b {
+  0%, 90%, 100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+  91% { transform: translate(3px, -1px); clip-path: inset(0 0 55% 0); }
+  94% { transform: translate(-3px, 2px); clip-path: inset(50% 0 0 0); }
+}
+
+/* --- KINETIC TICKER ------------------------------------------ */
+.mode-party .ticker {
+  display: block;
+  overflow: hidden;
+  background: #0a0a12;
+  border-block: 1px solid var(--hairline);
+  padding-block: 14px;
+}
+.mode-party .ticker__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: ticker 28s linear infinite;
+}
+.mode-party .ticker--rev .ticker__track { animation-direction: reverse; }
+.mode-party .ticker:hover .ticker__track { animation-play-state: paused; }
+.mode-party .ticker__item {
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 4.2vw, 2.6rem);
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+.mode-party .ticker__item i {
+  font-style: normal;
+  color: var(--cyan);
+  text-shadow: 0 0 14px var(--accent-glow);
+  margin-inline: 0.18em;
+}
+.mode-party .ticker__item i:nth-of-type(even) { color: var(--magenta); text-shadow: 0 0 14px rgba(255,61,240,0.5); }
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+/* --- COUNTDOWN (token semantics flipped → repair) ------------ */
+.mode-party .countdown-band { background-color: #08080e; color: var(--ink); }
+.mode-party .countdown-band::before {
+  background: radial-gradient(ellipse 90% 70% at 50% 50%, rgba(61,240,255,0.10) 0%, transparent 68%);
+}
+.mode-party .countdown-num { color: var(--ink); text-shadow: 0 0 22px var(--accent-glow); }
+.mode-party .countdown-headline em { color: var(--cyan); text-shadow: 0 0 22px var(--accent-glow); }
+.mode-party .countdown-sep { color: var(--magenta); opacity: 0.55; }
+
+/* --- BUTTONS (token flip repair + neon) ---------------------- */
+.mode-party .btn--accent {
+  background: var(--acid);
+  color: #07070b;
+  box-shadow: 0 0 0 1px rgba(198,255,58,0.4), 0 0 28px -4px rgba(198,255,58,0.55);
+}
+.mode-party .btn--accent:hover {
+  background: #d6ff66;
+  box-shadow: 0 0 0 1px rgba(198,255,58,0.6), 0 0 40px -2px rgba(198,255,58,0.7);
+}
+.mode-party .btn--cta {
+  background: var(--cyan);
+  color: #052b30;
+  box-shadow: 0 0 0 1px rgba(61,240,255,0.4), 0 0 30px -4px var(--accent-glow);
+}
+.mode-party .btn--cta:hover { background: #74f6ff; color: #052b30; }
+
+.mode-party #submitBtn {
+  background: var(--magenta);
+  color: #0a0a12;
+  box-shadow: 0 0 0 1px rgba(255,61,240,0.4), 0 0 28px -6px rgba(255,61,240,0.6);
+}
+.mode-party #submitBtn:hover { background: #ff63f3; transform: translateY(-1px); }
+
+/* --- STATS / ARCHIV / SPOTIFY / FORM neon polish ------------- */
+.mode-party .stat { background: rgba(255,255,255,0.025); }
+.mode-party .stat:hover { border-color: var(--accent); }
+.mode-party .stat__num { color: var(--ink); }
+.mode-party .stat__num em { color: var(--acid); }
+
+.mode-party .archiv-card { background: rgba(255,255,255,0.02); }
+.mode-party .archiv-card:hover .archiv-card__arrow { background: var(--cyan); border-color: var(--cyan); color: #07070b; }
+
+.mode-party .spotify-card__inner { background: rgba(255,255,255,0.025); }
+.mode-party .spotify-card__aura { background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(61,240,255,0.18), transparent 70%); }
+.mode-party .spotify-chip svg { color: #1ed760; }
+
+.mode-party .form-wrapper { background: rgba(255,255,255,0.025); }
+.mode-party .form-wrapper__corner { border-color: var(--magenta); }
+.mode-party #surveyForm input[type="text"],
+.mode-party #surveyForm input[type="email"],
+.mode-party #surveyForm textarea { background: rgba(0,0,0,0.35); color: var(--ink); }
+.mode-party #surveyForm input::placeholder,
+.mode-party #surveyForm textarea::placeholder { color: var(--ink-mute); opacity: 0.7; }
+.mode-party .file-drop-zone { background: rgba(0,0,0,0.3); }
+.mode-party .file-drop-zone:hover,
+.mode-party .file-drop-zone.is-over { background: var(--accent-soft); }
+.mode-party .file-item { background: rgba(255,255,255,0.05); color: var(--ink-soft); }
+
+/* --- DISTANCE stage (hardcoded light → dark) ----------------- */
+.mode-party .distance-stage {
+  background: linear-gradient(180deg, #0c0c16 0%, #08080f 100%);
+  border-color: var(--hairline);
+  box-shadow: var(--shadow-card);
+}
+.mode-party .distance-stage__grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+}
+.mode-party .distance-stage__glow {
+  background:
+    radial-gradient(ellipse 30% 40% at 35% 50%, rgba(61,240,255,0.20), transparent 60%),
+    radial-gradient(ellipse 25% 35% at 75% 50%, rgba(255,61,240,0.18), transparent 60%);
+  opacity: 0.6;
+}
+.mode-party .distance-counter__num {
+  background: linear-gradient(180deg, var(--cyan) 0%, var(--magenta) 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mode-party .distance-counter__unit { color: var(--magenta); }
+
+/* --- MODALS (scrim was tied to flipped --ink) ---------------- */
+.mode-party .modal-backdrop { background: rgba(3,3,7,0.74); }
+.mode-party .modal-dialog {
+  border: 1px solid var(--hairline);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 -24px 80px rgba(0,0,0,0.7), 0 0 70px -24px var(--accent-glow);
+}
+.mode-party .modal-title em { color: var(--magenta); }
+.mode-party .impressum-section h3 { color: var(--cyan); }
+
+/* --- HEADER glass + footer ----------------------------------- */
+.mode-party .site-header { border-bottom: 1px solid var(--hairline); }
+.mode-party .logo-mark { color: var(--cyan); filter: drop-shadow(0 0 6px var(--accent-glow)); }
+.mode-party .nav-marker { color: var(--magenta); }
+
+/* --- Reduced motion: freeze the loud stuff ------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .mode-party .glitch::before,
+  .mode-party .glitch::after { display: none; }
+  .mode-party .ticker__track { animation: none; transform: none; }
+  .mode-party body::after { opacity: 0.5; }
+}
+
+
+/* ================================================================
+   20. MODE TOGGLE + IRIS / GLITCH TRANSITION
+   Present in both modes; styled per-mode via tokens.
+================================================================ */
+.mode-switch-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: var(--s-7) var(--container-pad) var(--s-8);
+  text-align: center;
+}
+.mode-switch-band__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* The switch itself */
+.mode-toggle {
+  --knob: 30px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  width: 168px;
+  height: 44px;
+  padding: 6px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-pill);
+  background: var(--paper-deep);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: background var(--t-base) var(--ease), border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+.mode-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.mode-toggle__opt {
+  flex: 1;
+  z-index: 1;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  transition: color var(--t-base) var(--ease);
+  -webkit-user-select: none;
+          user-select: none;
+}
+.mode-toggle__knob {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: calc(50% - 6px);
+  height: calc(100% - 12px);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  transition: transform var(--t-base) var(--ease-out-back), background var(--t-base) var(--ease);
+}
+/* knob position + active label reflect aria-checked (party = checked) */
+.mode-toggle[aria-checked="false"] .mode-toggle__opt--biz   { color: var(--paper); }
+.mode-toggle[aria-checked="true"]  .mode-toggle__opt--party { color: #07070b; }
+.mode-toggle[aria-checked="true"]  .mode-toggle__knob { transform: translateX(100%); }
+
+/* Party-mode flavour for the switch */
+.mode-party .mode-toggle {
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 0 24px -6px var(--accent-glow);
+}
+.mode-party .mode-toggle__knob {
+  background: linear-gradient(92deg, var(--cyan), var(--magenta));
+}
+.mode-party .mode-switch-band__label { color: var(--ink-mute); }
+
+/* --- Iris / glitch overlay ----------------------------------- */
+.mode-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  pointer-events: none;
+  opacity: 0;
+  /* circle reveal origin + radius driven by JS (GSAP animates --fx-r) */
+  --fx-x: 50%;
+  --fx-y: 100%;
+  --fx-r: 0px;
+  background:
+    radial-gradient(circle at var(--fx-x) var(--fx-y), var(--cyan), var(--violet) 45%, var(--magenta) 100%);
+  clip-path: circle(var(--fx-r) at var(--fx-x) var(--fx-y));
+}
+.mode-fx.is-active { opacity: 1; }
+/* Brief RGB-glitch flash bars layered over the iris at the peak */
+.mode-fx__glitch {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,43,109,0.0) 0, rgba(255,43,109,0.0) 6px, rgba(255,43,109,0.5) 6px, rgba(255,43,109,0.5) 8px),
+    repeating-linear-gradient(0deg, rgba(43,155,255,0.0) 0, rgba(43,155,255,0.0) 10px, rgba(43,155,255,0.5) 10px, rgba(43,155,255,0.5) 12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-fx { display: none !important; }
+}
+
+/* Chapter II — "map still filling up" note (both modes) */
+.distance-note {
+  max-width: 540px;
+  margin: var(--s-2) auto 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  color: var(--ink-mute);
+  text-wrap: balance;
+}
+.mode-party .distance-note { color: var(--ink-soft); }

@@ -47,6 +47,95 @@ function svg(name, attrs = {}) {
 
 
 /* ----------------------------------------------------------------
+   SITE MODE — business (default) ⇄ party, with iris/glitch transition
+   The maps register a "themer" so they re-style live on switch.
+---------------------------------------------------------------- */
+const osDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+// Business keeps the original OS-aware basemap; party is always dark + neon.
+const wantDark = party => party || osDark();
+const MAP_THEME = {
+  heroStyle: party => wantDark(party)
+    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+    : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  tiles: party => wantDark(party)
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  heat: party => party
+    ? { 0.2: '#3df0ff', 0.5: '#a06bff', 0.8: '#ff3df0', 1.0: '#c6ff3a' }
+    : { 0.3: '#6dc9e5', 0.6: '#2da5c7', 1.0: '#053744' },
+  dot: party => (party ? '#3df0ff' : '#6dc9e5'),
+};
+
+const mapThemers = [];
+function registerMapThemer(fn) { mapThemers.push(fn); }
+
+function currentMode() {
+  return document.documentElement.classList.contains('mode-party') ? 'party' : 'business';
+}
+
+function applySiteMode(mode) {
+  const party = mode === 'party';
+  const root = document.documentElement;
+  root.classList.toggle('mode-party', party);
+  root.classList.toggle('mode-business', !party);
+  try { localStorage.setItem('siteMode', mode); } catch (e) {}
+
+  const toggle = document.getElementById('modeToggle');
+  if (toggle) toggle.setAttribute('aria-checked', String(party));
+
+  mapThemers.forEach(fn => { try { fn(party); } catch (e) {} });
+  if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+}
+
+function runModeTransition(targetMode, ox, oy) {
+  const fx = document.getElementById('modeFx');
+  // No overlay if reduced motion or GSAP/overlay unavailable — swap instantly
+  if (prefersReducedMotion || !fx || typeof gsap === 'undefined') {
+    applySiteMode(targetMode);
+    return;
+  }
+  const glitch = fx.querySelector('.mode-fx__glitch');
+  const maxR = Math.hypot(
+    Math.max(ox, window.innerWidth - ox),
+    Math.max(oy, window.innerHeight - oy)
+  ) + 40;
+
+  fx.style.setProperty('--fx-x', ox + 'px');
+  fx.style.setProperty('--fx-y', oy + 'px');
+  fx.classList.add('is-active');
+
+  const tl = gsap.timeline({
+    onComplete() {
+      fx.classList.remove('is-active');
+      gsap.set(fx, { '--fx-r': '0px' });
+      if (glitch) gsap.set(glitch, { opacity: 0 });
+    },
+  });
+  // iris opens to cover the viewport
+  tl.fromTo(fx, { '--fx-r': '0px' },
+        { '--fx-r': maxR + 'px', duration: 0.45, ease: 'power2.out' })
+    // swap theme while fully covered
+    .add(() => applySiteMode(targetMode))
+    // RGB-glitch flash at the peak
+    .fromTo(glitch, { opacity: 0 },
+        { opacity: 0.9, duration: 0.05, repeat: 3, yoyo: true }, '<')
+    // iris closes, revealing the new theme
+    .to(fx, { '--fx-r': '0px', duration: 0.4, ease: 'power2.in' }, '+=0.04');
+}
+
+(function initModeToggle() {
+  const toggle = document.getElementById('modeToggle');
+  if (!toggle) return;
+  toggle.setAttribute('aria-checked', String(currentMode() === 'party'));
+  toggle.addEventListener('click', () => {
+    const target = currentMode() === 'party' ? 'business' : 'party';
+    const r = toggle.getBoundingClientRect();
+    runModeTransition(target, r.left + r.width / 2, r.top + r.height / 2);
+  });
+})();
+
+
+/* ----------------------------------------------------------------
    Footer year + header counter
 ---------------------------------------------------------------- */
 const footerYearEl = document.getElementById('footerYear');
@@ -70,11 +159,8 @@ function setupHeroScroll() {
     return;
   }
 
-  const isDark = document.documentElement.classList.contains('dark')
-              || window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const heroStyleUrl = isDark
-    ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-    : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+  // Basemap follows the active site mode (light = business, dark = party)
+  const heroStyleUrl = MAP_THEME.heroStyle(currentMode() === 'party');
 
   const heroMap = new maplibregl.Map({
     container:        'hero-map',
@@ -86,6 +172,10 @@ function setupHeroScroll() {
     antialias:        true,
     attributionControl: false,
   });
+
+  // Re-style the basemap live when the user flips the mode toggle.
+  // Markers live in a separate DOM layer, so setStyle() leaves the school pin intact.
+  registerMapThemer(party => heroMap.setStyle(MAP_THEME.heroStyle(party)));
 
   // Waypoints — final zoom raised to 15; vector tiles render it cleanly
   const MAP_CHAPTERS = [
@@ -316,11 +406,7 @@ function initLeafletMap() {
     return;
   }
 
-  const isDark = document.documentElement.classList.contains('dark')
-              || window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const tileUrl = isDark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  const isParty = currentMode() === 'party';
 
   const allPoints = ALUMNI.map(a => [a.lat, a.lon]);
   const bounds    = L.latLngBounds(allPoints);
@@ -337,7 +423,8 @@ function initLeafletMap() {
 
   map.fitBounds(bounds, { padding: [40, 40] });
 
-  L.tileLayer(tileUrl, {
+  // Tile layer + heat layer kept in refs so the mode toggle can swap them live.
+  let tileLayer = L.tileLayer(MAP_THEME.tiles(isParty), {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19,
@@ -345,23 +432,41 @@ function initLeafletMap() {
 
   // Alumni heatmap (Leaflet.heat), fallback to circle markers
   const heatData = ALUMNI.map(a => [a.lat, a.lon, 1]);
+  let heatLayer = null;
+  let fallbackDots = [];
   if (typeof L.heatLayer !== 'undefined') {
-    L.heatLayer(heatData, {
+    heatLayer = L.heatLayer(heatData, {
       radius:   28,
       blur:     22,
       maxZoom:  12,
-      gradient: { 0.3: '#6dc9e5', 0.6: '#2da5c7', 1.0: '#053744' },
+      gradient: MAP_THEME.heat(isParty),
     }).addTo(map);
   } else {
-    ALUMNI.forEach(a => {
+    fallbackDots = ALUMNI.map(a =>
       L.circleMarker([a.lat, a.lon], {
         radius:      5,
-        fillColor:   '#6dc9e5',
+        fillColor:   MAP_THEME.dot(isParty),
         color:       'transparent',
-        fillOpacity: 0.6,
-      }).addTo(map);
-    });
+        fillOpacity: 0.7,
+      }).addTo(map)
+    );
   }
+
+  // Live re-theme on mode switch: swap tiles + heat gradient (or fallback dots)
+  registerMapThemer(party => {
+    map.removeLayer(tileLayer);
+    tileLayer = L.tileLayer(MAP_THEME.tiles(party), {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map);
+    tileLayer.bringToBack();
+    if (heatLayer) {
+      heatLayer.setOptions({ gradient: MAP_THEME.heat(party) });
+      heatLayer.redraw();
+    }
+    fallbackDots.forEach(d => d.setStyle({ fillColor: MAP_THEME.dot(party) }));
+  });
 
   // School pin on top
   const schoolIcon = L.divIcon({
